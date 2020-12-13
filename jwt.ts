@@ -1,5 +1,5 @@
-import verify from "./src/jsonwebtoken/verify.ts"
-import sign, {signInterface} from "./src/jsonwebtoken/sign.ts"
+import verify from "./src/jwt/verify.ts"
+import sign, {signInterface} from "./src/jwt/sign.ts"
 
 export {
     verify,
