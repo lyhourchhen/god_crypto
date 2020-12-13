@@ -1,6 +1,6 @@
 import { encode } from "./../../src/utility/encode.ts";
-import { JSONWebKey, RSAKeyParams } from "./common.ts";
-import { get_key_size, base64_to_binary } from "../helper.ts";
+import type { JSONWebKey, RSAKeyParams } from "./common.ts";
+import { base64_to_binary, get_key_size } from "../helper.ts";
 import { ber_decode, ber_simple } from "./basic_encoding_rule.ts";
 import { os2ip } from "./primitives.ts";
 
@@ -12,7 +12,7 @@ type RSACertKeyFormat = [
 
 /**
  * Automatically detect the key format
- * 
+ *
  * @param key
  */
 function detect_format(key: string | JSONWebKey): RSAImportKeyFormat {
@@ -28,7 +28,7 @@ function detect_format(key: string | JSONWebKey): RSAImportKeyFormat {
 /**
  * Import from JSON Web Key
  * https://tools.ietf.org/html/rfc7517
- * 
+ *
  * @param key PEM encoded key format
  */
 function rsa_import_jwk(key: JSONWebKey): RSAKeyParams {
@@ -51,10 +51,10 @@ function rsa_import_jwk(key: JSONWebKey): RSAKeyParams {
 }
 
 /**
- * 
+ *
  * https://tools.ietf.org/html/rfc5280#section-4.1
- * 
- * @param key 
+ *
+ * @param key
  */
 function rsa_import_pem_cert(key: string): RSAKeyParams {
   const trimmedKey = key.substr(27, key.length - 53);
@@ -72,7 +72,7 @@ function rsa_import_pem_cert(key: string): RSAKeyParams {
 /**
  * Import private key from Privacy-Enhanced Mail (PEM) format
  * https://tools.ietf.org/html/rfc5208
- * 
+ *
  * @param key PEM encoded key format
  */
 function rsa_import_pem_private(key: string): RSAKeyParams {
@@ -95,9 +95,36 @@ function rsa_import_pem_private(key: string): RSAKeyParams {
 }
 
 /**
+ * Import private key from Privacy-Enhanced Mail (PEM) format
+ * https://tools.ietf.org/html/rfc5208
+ *
+ * @param key PEM encoded key format
+ */
+function rsa_import_pem_private_pkcs8(key: string): RSAKeyParams {
+  const trimmedKey = key.substr(27, key.length - 57);
+  const parseWrappedKey = ber_simple(
+    ber_decode(base64_to_binary(trimmedKey)),
+  ) as [number, unknown, Uint8Array];
+
+  const parseKey = ber_simple(ber_decode(parseWrappedKey[2])) as bigint[];
+
+  return {
+    n: parseKey[1],
+    d: parseKey[3],
+    e: parseKey[2],
+    p: parseKey[4],
+    q: parseKey[5],
+    dp: parseKey[6],
+    dq: parseKey[7],
+    qi: parseKey[8],
+    length: get_key_size(parseKey[1]),
+  };
+}
+
+/**
  * Import public key from Privacy-Enhanced Mail (PEM) format
  * https://tools.ietf.org/html/rfc5208
- * 
+ *
  * @param key PEM encoded key format
  */
 function rsa_import_pem_public(key: string): RSAKeyParams {
@@ -116,20 +143,22 @@ function rsa_import_pem_public(key: string): RSAKeyParams {
 /**
  * Import key from Privacy-Enhanced Mail (PEM) format
  * https://tools.ietf.org/html/rfc5208
- * 
+ *
  * @param key PEM encoded key format
  */
 function rsa_import_pem(key: string): RSAKeyParams {
   if (typeof key !== "string") throw new TypeError("PEM key must be string");
+  const trimmedKey = key.trim();
 
   const maps: [string, (key: string) => RSAKeyParams][] = [
     ["-----BEGIN RSA PRIVATE KEY-----", rsa_import_pem_private],
+    ["-----BEGIN PRIVATE KEY-----", rsa_import_pem_private_pkcs8],
     ["-----BEGIN PUBLIC KEY-----", rsa_import_pem_public],
     ["-----BEGIN CERTIFICATE-----", rsa_import_pem_cert],
   ];
 
   for (const [prefix, func] of maps) {
-    if (key.indexOf(prefix) === 0) return func(key);
+    if (trimmedKey.indexOf(prefix) === 0) return func(trimmedKey);
   }
 
   throw new TypeError("Unsupported key format");
@@ -137,9 +166,9 @@ function rsa_import_pem(key: string): RSAKeyParams {
 
 /**
  * Import other RSA key format to our RSA key format
- * 
- * @param key 
- * @param format 
+ *
+ * @param key
+ * @param format
  */
 export function rsa_import_key(
   key: string | JSONWebKey,
