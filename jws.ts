@@ -1,4 +1,1 @@
-import {ALGORITHMS} from "./src/jws/algorithm.ts"
-export {
-    ALGORITHMS
-}
+export * from "./src/jose/jws"
