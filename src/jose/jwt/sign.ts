@@ -1,4 +1,4 @@
-import {ALGORITHMS} from "../../../jws.ts";
+import {ALGORITHMS} from "../jws/algorithm.ts";
 
 type signOptionsSchemaType = {
     isValid?: (value: any) => void | any
