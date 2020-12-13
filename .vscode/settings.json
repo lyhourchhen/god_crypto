@@ -1,7 +1,9 @@
 {
-    "deno.enableFormatter": true,
-    "editor.formatOnSave": true,
-    "editor.tabSize": 2,
-    "deno.enable": true,
-    "files.eol": "\n"
+  "editor.tabSize": 2,
+  "deno.enable": true,
+  "files.eol": "\n",
+  "editor.formatOnSave": true,
+  "[typescript]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  }
 }
