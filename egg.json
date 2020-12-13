@@ -1,0 +1,7 @@
+
+{
+  "name": "god_crypto",
+  "description": "Pure Javascript/Typescript Crypto Implementation for Deno. AES, RSA, HMAC, and TOTP",
+  "stable": false,
+  "repository": "https://github.com/invisal/god_crypto"
+}

@@ -8,7 +8,24 @@ const aes = new AES("Hello World AES!", {
 const cipher = await aes.encrypt("This is AES-128-CBC. It works.");
 console.log(cipher.hex());
 
-console.log("JWT Testing")
-import {sign} from "../jwt.ts"
+// console.log("JWT Testing")
+import {sign, signInterface} from "../jwt.ts"
+//
 
-sign()
+// sign()
+
+// Testing LODASH
+// import {isInteger} from "../src/jsonwebtoken/utilities/common.ts"
+//
+// let number = 213
+// isInteger(number)
+
+type Lyhour = {
+    name: String
+}
+
+let person: Lyhour = {
+    name: "hahah"
+}
+
+console.log(typeof person.name)
